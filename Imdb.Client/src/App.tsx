@@ -12,7 +12,6 @@ const[movies, setMovies] = useState<MovieModel[]>([]);
 const[years, setYears] = useState<number[]>([]);
 const[title, setTitle] = useState<string>("");
 const[year, setMovieYear] = useState<number>();
-const[plot, setMoviePlot] = useState<string>("");
 
 const selectMovie = (imdbID: string | undefined)=>{
   let movie = movies.find(x=> x.searchResult.imdbID == imdbID)?.searchResult;
@@ -26,17 +25,21 @@ const searchMovie = ()=>{
     Year: year == undefined ? '' : year.toString()
   }
 
-  console.log('query: ', query);
+  if(query['Year'] == '' || query['Year'].toString() == 'NaN') {
+    delete query['Year'];
+  }
 
-  MovieService.movieSearch(title, query).then(data=>{
-    let movie = data.data;
-    setMovie(movie);
-  }).finally(()=>{
-    MovieService.getSearchResults().then(data=>{
-      setMovies(data.data);
+  if (title != '') {
+    MovieService.movieSearch(title, query).then(data => {
+      let movie = data.data;
+      setMovie(movie);
+    }).finally(() => {
+      MovieService.getSearchResults().then(data => {
+        setMovies(data.data);
+      });
+
     });
-
-  });
+  }
 }
 
  useEffect(() => {
@@ -55,16 +58,16 @@ const searchMovie = ()=>{
   return (
     <div className="App">
       <header className="">
-      <nav className="navbar navbar-expand-lg navbar-light">
-        <div className="container">
-            
-            <a className="navbar-brand text-bold" href="#">Imdb Search</a>            
-            <form className="d-flex mx-auto">
-                <input className="form-control me-2 w-75" type="search" onChange={(e)=>setTitle(e.target.value)} placeholder="Search" aria-label="Search"/>
-                <button className="btn btn-primary" onClick={searchMovie} type="button">Search</button>
-            </form>
-        </div>
-    </nav>
+        <nav className="navbar navbar-expand-lg navbar-light">
+          <div className="container">
+              
+              <a className="navbar-brand text-bold" href="#">Imdb Search</a>            
+              <form className="d-flex mx-auto">
+                  <input className="form-control me-2 w-75" type="search" onChange={(e)=>setTitle(e.target.value)} placeholder="Search" aria-label="Search"/>
+                  <button className="btn btn-primary" onClick={searchMovie} type="button">Search</button>
+              </form>
+          </div>
+        </nav>
       </header>
       <div className="vertical-center">
         <div className="container">
@@ -97,7 +100,7 @@ const searchMovie = ()=>{
                   <div className="col-lg-6">
                     <label className='text-bold text-start'>Year</label>
                     <select className="form-select controlBody" onChange={(e)=>setMovieYear(parseInt(e.target.value))} aria-label="Default select example">
-                      <option selected></option>
+                      <option defaultValue={""}></option>
                       {years.map((year) => <option key={year} value={year}>{year}</option>)}
                     </select>
                   </div>
